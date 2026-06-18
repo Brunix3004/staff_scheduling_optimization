@@ -1,0 +1,3 @@
+Trabajador,Dia,Tipo,Hora Inicio,Hora Fin,Comentario
+,VIERNES,NO_TRABAJA,,,Ejemplo: examen o solicitud aprobada
+,SABADO,TURNO_ESPECIFICO,19:00,23:00,Ejemplo: cambio de turno aprobado
