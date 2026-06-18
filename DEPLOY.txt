@@ -1,0 +1,152 @@
+# GUIA DE DEPLOY — Bembos Scheduler
+# Gratis, siempre prendido, sin depender de tu PC
+# =============================================
+# Stack: Supabase (PostgreSQL gratis) + Hugging Face Spaces (Docker gratis)
+# Tiempo estimado: 20-30 minutos la primera vez
+
+
+# ══════════════════════════════════════════════
+# PARTE 1 — BASE DE DATOS EN SUPABASE (gratis)
+# ══════════════════════════════════════════════
+
+PASO 1: Crear cuenta en Supabase
+  → Ve a https://supabase.com
+  → "Start your project" → regístrate con GitHub o email (gratis)
+
+PASO 2: Crear un proyecto nuevo
+  → Click en "New project"
+  → Name: bembos-scheduler  (o cualquier nombre)
+  → Database Password: pon una contraseña segura y GUÁRDALA
+  → Region: South America (São Paulo) — la más cercana a Perú
+  → Click "Create new project" — tarda ~2 minutos en crear
+
+PASO 3: Obtener la DATABASE_URL
+  → En tu proyecto → Settings (ícono de engranaje) → Database
+  → Busca la sección "Connection string" → pestaña "URI"
+  → Verás algo como:
+      postgresql://postgres:[YOUR-PASSWORD]@db.xxxx.supabase.co:5432/postgres
+  → Reemplaza [YOUR-PASSWORD] con la contraseña que pusiste en el Paso 2
+  → COPIA esa URL completa — la necesitas en la Parte 2
+
+  ⚠️  NO compartas esta URL con nadie — tiene acceso total a tu base de datos
+
+
+# ══════════════════════════════════════════════
+# PARTE 2 — SUBIR CÓDIGO A GITHUB
+# ══════════════════════════════════════════════
+
+PASO 4: Crear repositorio en GitHub
+  → Ve a https://github.com → "New repository"
+  → Name: bembos-scheduler
+  → Visibilidad: Private (recomendado)
+  → Click "Create repository"
+
+PASO 5: Subir los archivos
+  Desde tu carpeta del proyecto, en terminal:
+
+    git init
+    git add .
+    git commit -m "Bembos Scheduler v2 - PostgreSQL"
+    git branch -M main
+    git remote add origin https://github.com/TU_USUARIO/bembos-scheduler.git
+    git push -u origin main
+
+  Los archivos que deben estar en el repo:
+    ✓ app.py
+    ✓ database.py
+    ✓ scheduler_core.py
+    ✓ requirements.txt
+    ✓ Dockerfile
+    ✓ README.md
+
+
+# ══════════════════════════════════════════════
+# PARTE 3 — DEPLOY EN HUGGING FACE SPACES
+# ══════════════════════════════════════════════
+
+PASO 6: Crear cuenta en Hugging Face
+  → Ve a https://huggingface.co
+  → "Sign Up" → gratis
+
+PASO 7: Crear un nuevo Space
+  → Click en tu avatar → "New Space"
+  → Space name: bembos-scheduler
+  → License: mit
+  → SDK: Docker  ← MUY IMPORTANTE, elegir Docker no Streamlit
+  → Visibility: Private (solo tú puedes verlo)
+  → Click "Create Space"
+
+PASO 8: Conectar con tu repositorio GitHub
+  → En el Space recién creado → Files → "..." → "Upload files"
+  → Sube todos los archivos de tu proyecto:
+      app.py
+      database.py
+      scheduler_core.py
+      requirements.txt
+      Dockerfile
+      README.md
+
+  ALTERNATIVA más fácil si sabes usar git:
+  → En el Space → Clone repository
+  → Sigue las instrucciones para hacer push desde tu repo local
+
+PASO 9: Configurar el Secret DATABASE_URL
+  → En tu Space → Settings → Repository secrets
+  → Click "New secret"
+  → Name:  DATABASE_URL
+  → Value: postgresql://postgres:TU_PASSWORD@db.xxxx.supabase.co:5432/postgres
+             (la URL que copiaste en el Paso 3)
+  → Click "Save"
+
+PASO 10: Hacer Factory Reboot
+  → En tu Space → Settings → Factory reboot
+  → Esto hace que el Space se reconstruya con el secret nuevo
+  → Espera ~3-5 minutos mientras construye el Docker
+
+PASO 11: ¡Listo!
+  → Tu Space tendrá una URL tipo:
+      https://huggingface.co/spaces/TU_USUARIO/bembos-scheduler
+  → Esa URL funciona 24/7, desde cualquier dispositivo, sin tu PC
+
+
+# ══════════════════════════════════════════════
+# LÍMITES DEL PLAN GRATUITO
+# ══════════════════════════════════════════════
+
+Supabase gratis:
+  ✓ 500 MB de base de datos — más que suficiente
+  ✓ Siempre activo (no se duerme la DB)
+  ✓ Backups diarios automáticos
+  ✗ Si no hay actividad por 7 días el proyecto se pausa
+    → Solución: entrar a la app al menos una vez por semana
+    → O en Supabase → Settings → activar "Pause prevention"
+
+Hugging Face Spaces gratis (Docker):
+  ✓ 2 CPU, 16 GB RAM — más que suficiente para Streamlit
+  ✓ Siempre activo mientras haya actividad
+  ✗ Se "duerme" después de 48h sin visitas (en Spaces públicos)
+    → Con visibilidad Private NO se duerme nunca
+    → Si lo pones público, puede dormirse; al entrar despierta en ~30 seg
+
+Consejo: déjalo en Private. Comparte el link solo con los admins del restaurante.
+
+
+# ══════════════════════════════════════════════
+# SOLUCIÓN DE PROBLEMAS COMUNES
+# ══════════════════════════════════════════════
+
+Error: "DATABASE_URL no encontrada"
+  → El secret no se configuró bien. Revisa el Paso 9.
+  → Después de agregar el secret siempre hacer Factory Reboot.
+
+Error al conectar con la DB
+  → Verifica que la URL tenga la contraseña correcta (sin [YOUR-PASSWORD])
+  → En Supabase → Settings → Database → verifica que el proyecto esté activo
+
+El Space no construye / error en Docker
+  → Ve a tu Space → Logs → revisa el error
+  → El más común es que falta un archivo. Verifica que subiste todos los .py
+
+El proyecto de Supabase está pausado
+  → Entra a supabase.com → click "Restore" en tu proyecto
+  → Tarda ~2 minutos. Luego vuelve a funcionar todo.

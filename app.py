@@ -14,7 +14,6 @@ import pandas as pd
 import streamlit as st
 
 from database import (
-    DB_PATH,
     authenticate_user,
     availability_df,
     change_password,
@@ -76,7 +75,8 @@ IMPORT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def get_con():
-    con = get_connection()
+    """Conexión PostgreSQL. Streamlit la crea una vez por sesión."""
+    con = get_connection()   # lee DATABASE_URL del entorno
     init_db(con)
     return con
 
@@ -1083,12 +1083,11 @@ elif page == "Configuración":
 
     st.divider()
     st.markdown("### Backup")
-    if DB_PATH.exists():
-        st.download_button(
-            "⬇️ Descargar copia de seguridad (.db)",
-            data=DB_PATH.read_bytes(),
-            file_name="bembos_scheduler_backup.db",
-        )
+    st.info(
+        "Tu base de datos vive en Supabase (PostgreSQL). "
+        "Para hacer backup entra a tu proyecto en [supabase.com](https://supabase.com) → "
+        "**Database → Backups**. Supabase hace backups diarios automáticos en el plan gratuito."
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
